@@ -1,50 +1,66 @@
 import 'dart:io';
+
 import 'package:args/args.dart';
 import 'package:flutter_asset_generator/builder.dart';
+import 'package:flutter_asset_generator/logger.dart';
 import 'package:path/path.dart' as path_library;
 
 String get separator => path_library.separator;
+
 void main(List<String> args) {
-  var parser = new ArgParser();
+  final ArgParser parser = ArgParser();
   parser.addFlag(
-    "watch",
+    'watch',
     abbr: 'w',
     defaultsTo: true,
-    help: "Continue to monitor changes after execution of orders.",
+    help: 'Continue to monitor changes after execution of orders.',
   );
   parser.addOption(
-    "output",
+    'output',
     abbr: 'o',
-    defaultsTo: "lib${separator}const${separator}resource.dart",
+    defaultsTo: 'lib${separator}const${separator}resource.dart',
     help:
-        "Your resource file path. \nIf it's a relative path, the relative flutter root directory",
+        'Your resource file path. \nIf it\'s a relative path, the relative flutter root directory',
   );
   parser.addOption(
-    "src",
+    'src',
     abbr: 's',
-    defaultsTo: ".",
-    help: "Flutter project root path",
+    defaultsTo: '.',
+    help: 'Flutter project root path',
   );
-  parser.addFlag("help", abbr: 'h', help: "Help usage", defaultsTo: false);
+  parser.addFlag('help', abbr: 'h', help: 'Help usage', defaultsTo: false);
 
-  var results = parser.parse(args);
+  parser.addFlag('debug', abbr: 'd', help: 'debug info', defaultsTo: false);
 
-  if (results.wasParsed("help")) {
+  parser.addFlag(
+    'preview',
+    abbr: 'p',
+    help:
+        'Enable preview comments, defaults to true, use --no-preview to disable this functionality',
+    defaultsTo: true,
+  );
+
+  final ArgResults results = parser.parse(args);
+
+  Logger().isDebug = results['debug'] as bool;
+
+  if (results.wasParsed('help')) {
     print(parser.usage);
     return;
   }
 
-  String path = results["src"];
-  String outputPath = results["output"];
-  var workPath = File(path).absolute;
-  print("Generate files for Project : " + workPath.absolute.path);
+  final String path = results['src'] as String;
+  final String outputPath = results['output'] as String;
+  final File workPath = File(path).absolute;
 
-  check(workPath, outputPath, results["watch"]);
+  check(workPath, outputPath, results['watch'] as bool,
+      results['preview'] as bool);
 }
 
-void check(File workPath, String outputPath, bool isWatch) {
-  var builder = ResourceDartBuilder(workPath.absolute.path, outputPath);
-  builder.generateResourceDartFile();
+void check(File workPath, String outputPath, bool isWatch, bool isPreview) {
+  final ResourceDartBuilder builder =
+      ResourceDartBuilder(workPath.absolute.path, outputPath);
   builder.isWatch = isWatch;
-  builder.watchFileChange();
+  builder.isPreview = isPreview;
+  builder.generateResourceDartFile();
 }

@@ -45,7 +45,9 @@ pub global activate flutter_asset_generator
 
 use:
 
-`fgen $flutter_project`
+`fgen`
+or
+`fgen -s $flutter_project`
 
 ### Support options
 
@@ -64,6 +66,8 @@ fgen -h
                     (defaults to ".")
 
 -h, --[no-]help     Help usage
+
+-p, --[no-]preview  Generate file with preview comments
 ```
 
 ## File name
